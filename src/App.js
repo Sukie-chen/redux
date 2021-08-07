@@ -1,13 +1,42 @@
-import React, {useState, useContext} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import './App.css';
 const appContext = React.createContext(null)
-function App() {
-  const [appState, setAppState]= useState({
+const store = {
+  state: {
     user: {name: 'Sunny', age: 18 }
-  })
-  const contextValue = {appState, setAppState}
+  },
+  setState(newState){
+    store.state = newState
+    store.listeners.map(fn => fn(store.state))
+  },
+  listeners: [],
+  subscribe(fn) {
+    store.listeners.push(fn)
+    return () => {
+      const index = store.listeners.indexOf(fn)
+      store.listeners.splice(index, 1)
+    }
+  }
+}
+// connect 将组件与全局状态联系在一起
+const connect = (Component) => {
+  return (props) => {
+    const {state, setState} = useContext(appContext)
+    const [, update] = useState({})
+    useEffect(()=> {
+      store.subscribe( ()=> {
+        update({})
+      })
+    }, [])
+    const dispatch = (action) => {
+      setState(reducer(state, action))
+    }
+    return <Component {...props} dispatch={dispatch} state={state}/>
+  }
+}
+function App() {
   return (
-    <appContext.Provider  className="App" value={contextValue}>
+    <appContext.Provider  className="App" value={store}>
       <Item1/>
       <Item2/>
       <Item3/>
@@ -27,16 +56,7 @@ const reducer = (state, {type, payload}) => {
   }else {}
   return state
 }
-// connect 将组件与全局状态联系在一起
-const connect = (Component) => {
-  return (props) => {
-    const {appState, setAppState} = useContext(appContext)
-    const dispatch = (action) => {
-      setAppState(reducer(appState, action))
-    }
-    return <Component {...props} dispatch={dispatch} state={appState}/>
-  }
-}
+
 
 const Item1 = () => {
   console.log('Item1-----',Math.random())
@@ -51,6 +71,7 @@ const Item3 = () => {
   return <section className='item'>子组件3<Item4/></section>
 }
 const InputItem =connect(({dispatch, state}) => {
+  console.log('InputItem----', Math.random())
   const changeValue = (e) => {
     dispatch({type:'UPDATE',payload:{name: e.target.value}})
   }
@@ -58,10 +79,9 @@ const InputItem =connect(({dispatch, state}) => {
                  onChange={changeValue}/>
   </div>
 })
-const InputView = () => {
-  const contextValue = useContext(appContext)
-  return <div>变动实时显示用户名：{contextValue.appState.user.name}</div>
-}
+const InputView = connect(({state}) => {
+  return <div>变动实时显示用户名：{state.user.name}</div>
+})
 const Item4 = () => {
   console.log('Item4-----',Math.random())
   return  <div>不更新组件</div>
