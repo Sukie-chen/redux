@@ -42,11 +42,15 @@ const change = (oldData, newData) => {
     return changed
 }
 // connect 将组件与全局状态联系在一起
-export const connect = (selector) => (Component) => {
+export const connect = (selector, mapDispatchToProps) => (Component) => {
     return (props) => {
         const {state, setState} = useContext(appContext)
         const [, update] = useState({})
         const data = selector ? selector(state) : {state}
+        const dispatch = (action) => {
+            setState(reducer(state, action))
+        }
+        const dispatcher= mapDispatchToProps ? mapDispatchToProps(dispatch) : {dispatch}
         useEffect(() => {
             return store.subscribe(() => {
                 const newData = selector ? selector(store.state) : {state: store.state}
@@ -57,9 +61,7 @@ export const connect = (selector) => (Component) => {
 
             })
         }, [selector])
-        const dispatch = (action) => {
-            setState(reducer(state, action))
-        }
-        return <Component {...props} {...data} dispatch={dispatch}/>
+
+        return <Component {...props} {...data} {...dispatcher}/>
     }
 }

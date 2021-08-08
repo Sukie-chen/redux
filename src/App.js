@@ -26,10 +26,14 @@ const Item3 = () => {
   console.log('Item3-----',Math.random())
   return <section className='item'>子组件3<Item4/></section>
 }
-const InputItem =connect()(({dispatch, state}) => {
+const InputItem =connect(null, (dispatch) => {
+    return {
+        update: (payloadData) => dispatch({type:'UPDATE',payload:payloadData})
+    }
+})(({update, state}) => {
     console.log('InputItem----', Math.random())
     const changeValue = (e) => {
-      dispatch({type:'UPDATE',payload:{name: e.target.value}})
+        update({name: e.target.value})
     }
     return <div>变动输入框：<input value={state.user.name}
                              onChange={changeValue}/>
