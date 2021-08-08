@@ -26,17 +26,19 @@ const Item3 = () => {
   console.log('Item3-----',Math.random())
   return <section className='item'>子组件3<Item4/></section>
 }
-const InputItem =connect(({dispatch, state}) => {
-  console.log('InputItem----', Math.random())
-  const changeValue = (e) => {
-    dispatch({type:'UPDATE',payload:{name: e.target.value}})
-  }
-  return <div>变动输入框：<input value={state.user.name}
-                 onChange={changeValue}/>
-  </div>
-})
-const InputView = connect(({state}) => {
-  return <div>变动实时显示用户名：{state.user.name}</div>
+const InputItem =connect()(({dispatch, state}) => {
+    console.log('InputItem----', Math.random())
+    const changeValue = (e) => {
+      dispatch({type:'UPDATE',payload:{name: e.target.value}})
+    }
+    return <div>变动输入框：<input value={state.user.name}
+                             onChange={changeValue}/>
+    </div>
+  })
+const InputView = connect(state => {
+  return {user: state.user}
+})(({user}) => {
+  return <div>变动实时显示用户名：{user.user.name}</div>
 })
 const Item4 = () => {
   console.log('Item4-----',Math.random())

@@ -3,9 +3,9 @@ import React, {useContext, useEffect, useState} from "react";
 export const appContext = React.createContext(null)
 export const store = {
     state: {
-        user: {name: 'Sunny', age: 18 }
+        user: {name: 'Sunny', age: 18}
     },
-    setState(newState){
+    setState(newState) {
         store.state = newState
         store.listeners.map(fn => fn(store.state))
     },
@@ -19,7 +19,7 @@ export const store = {
     }
 }
 const reducer = (state, {type, payload}) => {
-    if (type=== 'UPDATE') {
+    if (type === 'UPDATE') {
         return {
             ...state,
             user: {
@@ -27,22 +27,24 @@ const reducer = (state, {type, payload}) => {
                 ...payload
             }
         }
-    }else {}
+    } else {
+    }
     return state
 }
 // connect 将组件与全局状态联系在一起
-export const connect = (Component) => {
+export const connect = (selector) => (Component) => {
     return (props) => {
         const {state, setState} = useContext(appContext)
         const [, update] = useState({})
-        useEffect(()=> {
-            store.subscribe( ()=> {
+        const data = selector ? selector(state) : state
+        useEffect(() => {
+            store.subscribe(() => {
                 update({})
             })
         }, [])
         const dispatch = (action) => {
             setState(reducer(state, action))
         }
-        return <Component {...props} dispatch={dispatch} state={state}/>
+        return <Component {...props} {...data} dispatch={dispatch}/>
     }
 }
