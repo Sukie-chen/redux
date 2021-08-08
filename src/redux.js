@@ -1,28 +1,33 @@
-import React, {useContext, useEffect, useState} from "react";
-
-export const appContext = React.createContext(null)
-export const createStore = (reducer, initState) => {
-    store.state = initState
-    store.reducer = reducer
-    return store
+import React, {useEffect, useState} from "react";
+let state = undefined
+let reducer = undefined
+let listeners = []
+const setState = (newState) =>{
+    state = newState
+    listeners.map(fn => fn(state))
 }
+export const appContext = React.createContext(null)
+
 const store = {
-    state: undefined,
-    reducer: undefined,
-    setState(newState) {
-        store.state = newState
-        store.listeners.map(fn => fn(store.state))
+    getState: () => {
+        return state
     },
-    listeners: [],
+    dispatch: (action) => {
+        setState(reducer(state, action))
+    },
     subscribe(fn) {
-        store.listeners.push(fn)
+        listeners.push(fn)
         return () => {
-            const index = store.listeners.indexOf(fn)
-            store.listeners.splice(index, 1)
+            const index = listeners.indexOf(fn)
+            listeners.splice(index, 1)
         }
     }
 }
-
+export const createStore = (_reducer, initState) => {
+    state = initState
+    reducer = _reducer
+    return store
+}
 const change = (oldData, newData) => {
     let changed = false
     for(let key in oldData) {
@@ -33,18 +38,17 @@ const change = (oldData, newData) => {
     return changed
 }
 // connect 将组件与全局状态联系在一起
+const dispatch = store.dispatch
 export const connect = (selector, mapDispatchToProps) => (Component) => {
     return (props) => {
-        const {state, setState} = useContext(appContext)
         const [, update] = useState({})
+        const state = store.getState()
         const data = selector ? selector(state) : {state}
-        const dispatch = (action) => {
-            setState(store.reducer(state, action))
-        }
         const dispatcher= mapDispatchToProps ? mapDispatchToProps(dispatch) : {dispatch}
         useEffect(() => {
             return store.subscribe(() => {
-                const newData = selector ? selector(store.state) : {state: store.state}
+                const newState = store.getState()
+                const newData = selector ? selector(newState) : {newState}
                 if (change(data,newData)) {
                     console.log('update-data')
                     update({})

@@ -1,6 +1,6 @@
 import React from "react";
 import './App.css';
-import {appContext, createStore, connect, Provider} from "./redux";
+import { createStore, connect, Provider} from "./redux";
 const reducer = (state, {type, payload}) => {
     if (type === 'UPDATE') {
         return {
