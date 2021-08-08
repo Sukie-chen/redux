@@ -1,7 +1,6 @@
 import React from "react";
 import './App.css';
-import {appContext, createStore, connect} from "./redux";
-
+import {appContext, createStore, connect, Provider} from "./redux";
 const reducer = (state, {type, payload}) => {
     if (type === 'UPDATE') {
         return {
@@ -23,11 +22,11 @@ const initState = {
 const store = createStore(reducer, initState)
 function App() {
   return (
-    <appContext.Provider  className="App" value={store}>
+    <Provider  className="App" store={store}>
       <Item1/>
       <Item2/>
       <Item3/>
-    </appContext.Provider>
+    </Provider>
   );
 }
 
