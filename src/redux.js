@@ -3,7 +3,8 @@ import React, {useContext, useEffect, useState} from "react";
 export const appContext = React.createContext(null)
 export const store = {
     state: {
-        user: {name: 'Sunny', age: 18}
+        user: {name: 'Sunny', age: 18},
+        group: {name: 'web'}
     },
     setState(newState) {
         store.state = newState
@@ -31,17 +32,31 @@ const reducer = (state, {type, payload}) => {
     }
     return state
 }
+const change = (oldData, newData) => {
+    let changed = false
+    for(let key in oldData) {
+        if (oldData[key] !== newData[key]) {
+            changed = true
+        }
+    }
+    return changed
+}
 // connect 将组件与全局状态联系在一起
 export const connect = (selector) => (Component) => {
     return (props) => {
         const {state, setState} = useContext(appContext)
         const [, update] = useState({})
-        const data = selector ? selector(state) : state
+        const data = selector ? selector(state) : {state}
         useEffect(() => {
-            store.subscribe(() => {
-                update({})
+            return store.subscribe(() => {
+                const newData = selector ? selector(store.state) : {state: store.state}
+                if (change(data,newData)) {
+                    console.log('update-data')
+                    update({})
+                }
+
             })
-        }, [])
+        }, [selector])
         const dispatch = (action) => {
             setState(reducer(state, action))
         }

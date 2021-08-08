@@ -38,10 +38,13 @@ const InputItem =connect()(({dispatch, state}) => {
 const InputView = connect(state => {
   return {user: state.user}
 })(({user}) => {
-  return <div>变动实时显示用户名：{user.user.name}</div>
+    console.log('InputView----', Math.random())
+  return <div>变动实时显示用户名：{user.name}</div>
 })
-const Item4 = () => {
+const Item4 = connect(state => {
+    return {group: state.group}
+})(({group}) => {
   console.log('Item4-----',Math.random())
-  return  <div>不更新组件</div>
-}
+  return  <div>不更新组件内容：  {group.name}</div>
+})
 export default App;
