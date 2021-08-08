@@ -1,6 +1,26 @@
 import React from "react";
 import './App.css';
-import {appContext, store, connect} from "./redux";
+import {appContext, createStore, connect} from "./redux";
+
+const reducer = (state, {type, payload}) => {
+    if (type === 'UPDATE') {
+        return {
+            ...state,
+            user: {
+                ...state.user,
+                ...payload
+            }
+        }
+    } else {
+    }
+    return state
+}
+
+const initState = {
+    user: {name: 'Sunny', age: 18},
+    group: {name: 'web'}
+}
+const store = createStore(reducer, initState)
 function App() {
   return (
     <appContext.Provider  className="App" value={store}>
